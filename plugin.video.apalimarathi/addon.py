@@ -119,7 +119,7 @@ def show_recent_natak_list(name, url, language, mode, iconimage, bannerimage):
     if len(page_list):
        print "Max Pages = %d " % len(page_list)
        if currentPage < len(page_list):
-          addDir("Next >>", str(currentPage+1), 3, "http://psnc.org.uk/wp-content/uploads/2015/07/eps-arrow-yellow-next-250x255.png", '')
+          addDir("Next >>", str(currentPage+1), 16, "http://psnc.org.uk/wp-content/uploads/2015/07/eps-arrow-yellow-next-250x255.png", '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def show_recent_list(name, url, language, mode, iconimage, bannerimage):
