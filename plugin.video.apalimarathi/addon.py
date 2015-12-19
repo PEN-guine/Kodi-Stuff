@@ -21,9 +21,12 @@ common.plugin = "plugin.video.apalimarathi"
 ADDON = xbmcaddon.Addon(id='plugin.video.apalimarathi')
 
 APALIMARATHI_MOVIES_URL = "http://mtalky.com/"
+APALIMARATHI_NATAKS_URL = "http://mtalky.com/"
 APALIMARATHI_MOVIES_PAGE_URL = "http://mtalky.com/OnlineList.aspx?Show=Picture&page="
 APALIMARATHI_MOVIES_ALPHA_URL = "http://mtalky.com/OnlineList.aspx?Show=Picture&NameStartWithLetter="
+APALIMARATHI_NATAKS_ALPHA_URL = "http://mtalky.com/OnlineList.aspx?Show=Nataks&NameStartWithLetter="
 APALIMARATHI_MOVIES_YEARS_URL = "http://mtalky.com/OnlineList.aspx?Show=Picture&ReleaseYear="
+APALIMARATHI_NATAKS_PAGE_URL = "http://mtalky.com/OnlineList.aspx?Show=Nataks&page="
 
 def addDir(name, url, mode, iconimage, bannerImage='', lang='', infolabels=None):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&lang="+urllib.quote_plus(lang)+"&bannerImage="+urllib.quote_plus(bannerImage)+"&iconImage="+urllib.quote_plus(iconimage)
@@ -48,6 +51,7 @@ def main_categories(name, url, language, mode, iconimage, bannerimage):
     cwd = ADDON.getAddonInfo('path')
     img_path = cwd + '/images/'
     addDir('Marathi Movies', '', 7, img_path + 'Marathi_Movies.png', 'marathi')
+    addDir('Marathi Natak', '', 15, img_path + 'rangabhomi.jpg', 'marathi')
     addDir('Addon Settings', '', 13, img_path + 'settings.png', '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -80,6 +84,42 @@ def inner_categories(name, url, language, mode, iconimage, bannerimage):
     addDir('Years', postData, 12, img_path + 'years.png', language)
     #addDir('Actors', postData, 10, img_path + 'actors.png', language)
     #addDir('Director', postData, 11, img_path + 'director.png', language)
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+def inner_natak_categories(name, url, language, mode, iconimage, bannerimage):
+    cwd = ADDON.getAddonInfo('path')
+    img_path = cwd + '/images/' 
+
+    postData = 'lang=' + language + '&'
+    postDataPage = '1'
+
+    addDir('Recent', postDataPage, 16, img_path + 'recent.png', language)
+    addDir('A-Z', postData, 17, img_path + 'a_z.png', language)
+    #addDir('Years', postData, 12, img_path + 'years.png', language)
+    #addDir('Actors', postData, 10, img_path + 'actors.png', language)
+    #addDir('Director', postData, 11, img_path + 'director.png', language)
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+def show_recent_natak_list(name, url, language, mode, iconimage, bannerimage):
+    cwd = ADDON.getAddonInfo('path')
+    currentPage = int(url)
+    print "input url-Page = [%d]" % currentPage
+    html_string = common.fetchPage({"link": APALIMARATHI_NATAKS_PAGE_URL + str(currentPage)})
+    common.log(html_string)
+
+    retMovies = get_movies_from_url(APALIMARATHI_NATAKS_PAGE_URL + str(currentPage))
+    for i in range(0, len(retMovies)):
+        addDir((retMovies[i]['Title']).encode('utf-8'), APALIMARATHI_NATAKS_URL + (retMovies[i]['Link']).encode('utf-8'), 9, (retMovies[i]['ImageLink']).encode('utf-8'))
+
+    #Create the Next Page link
+    page_div = common.parseDOM(html_string["content"], "div", attrs = { "id": "Main_ChildContent1_Panel1" })
+    page_list = common.parseDOM(page_div, "a") #, ret = "href")
+    print repr(page_list)
+    #page_links_list = common.parseDOM(html_string, "a", attrs = { "class": "pageLink" })
+    if len(page_list):
+       print "Max Pages = %d " % len(page_list)
+       if currentPage < len(page_list):
+          addDir("Next >>", str(currentPage+1), 3, "http://psnc.org.uk/wp-content/uploads/2015/07/eps-arrow-yellow-next-250x255.png", '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def show_recent_list(name, url, language, mode, iconimage, bannerimage):
@@ -257,6 +297,12 @@ def show_A_Z(name, url, language, mode, iconimage, bannerimage):
         addDir(letter, letter, 11, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
+def show_natak_A_Z(name, url, language, mode, iconimage, bannerimage):
+    azlist = map (chr, range(65,91))
+    for letter in azlist:
+        addDir(letter, letter, 18, '')
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
 ##
 # Displays the List of movies for selected alphabet. Called when id is 11.
 ##
@@ -266,6 +312,14 @@ def show_movie_list_by_alpha(name, url, language, mode, iconimage, bannerimage):
     retMovies = get_movies_from_url(APALIMARATHI_MOVIES_ALPHA_URL + currentPage)
     for i in range(0, len(retMovies)):
         addDir((retMovies[i]['Title']).encode('utf-8'), APALIMARATHI_MOVIES_URL + (retMovies[i]['Link']).encode('utf-8'), 9, (retMovies[i]['ImageLink']).encode('utf-8'))
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+def show_natak_list_by_alpha(name, url, language, mode, iconimage, bannerimage):
+    currentPage = url
+    print "input url-Alphabet = [%s]" % currentPage
+    retMovies = get_movies_from_url(APALIMARATHI_NATAKS_ALPHA_URL + currentPage)
+    for i in range(0, len(retMovies)):
+        addDir((retMovies[i]['Title']).encode('utf-8'), APALIMARATHI_NATAKS_URL + (retMovies[i]['Link']).encode('utf-8'), 9, (retMovies[i]['ImageLink']).encode('utf-8'))
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def get_movies_from_url(urlIn):
@@ -384,6 +438,8 @@ except:
 #12: show_Years
 #13: show_settings
 #14: show_movie_list_by_year
+#15: inner_natak_categories
+#16: show_recent_natak_list
 
 function_map = {}
 function_map[0] = main_categories
@@ -397,5 +453,9 @@ function_map[11] = show_movie_list_by_alpha
 function_map[12] = show_Years
 function_map[13] = show_settings
 function_map[14] = show_movie_list_by_year
+function_map[15] = inner_natak_categories
+function_map[16] = show_recent_natak_list
+function_map[17] = show_natak_A_Z
+function_map[18] = show_natak_list_by_alpha
 
 function_map[mode](name, url, language, mode, iconimage, bannerimage)
