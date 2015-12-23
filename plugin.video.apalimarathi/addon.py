@@ -27,6 +27,8 @@ APALIMARATHI_MOVIES_ALPHA_URL = "http://mtalky.com/OnlineList.aspx?Show=Picture&
 APALIMARATHI_NATAKS_ALPHA_URL = "http://mtalky.com/OnlineList.aspx?Show=Nataks&NameStartWithLetter="
 APALIMARATHI_MOVIES_YEARS_URL = "http://mtalky.com/OnlineList.aspx?Show=Picture&ReleaseYear="
 APALIMARATHI_NATAKS_PAGE_URL = "http://mtalky.com/OnlineList.aspx?Show=Nataks&page="
+APALIMARATHI_ZEE_MARATHI_BASE_URL = "http://tvforumonline.com/"
+APALIMARATHI_ZEE_MARATHI_URL = "http://tvforumonline.com/Guide.aspx?c=One"
 
 def addDir(name, url, mode, iconimage, bannerImage='', lang='', infolabels=None):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&lang="+urllib.quote_plus(lang)+"&bannerImage="+urllib.quote_plus(bannerImage)+"&iconImage="+urllib.quote_plus(iconimage)
@@ -52,6 +54,7 @@ def main_categories(name, url, language, mode, iconimage, bannerimage):
     img_path = cwd + '/images/'
     addDir('Marathi Movies', '', 7, img_path + 'Marathi_Movies.png', 'marathi')
     addDir('Marathi Natak', '', 15, img_path + 'rangabhomi.jpg', 'marathi')
+    addDir('Marathi TV Shows', '', 19, img_path + 'Marathi_Malika.png', 'marathi')
     addDir('Addon Settings', '', 13, img_path + 'settings.png', '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -372,6 +375,98 @@ def show_Years(name, url, language, mode, iconimage, bannerimage):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
+# Displays the shows for Zee Marathi. Called when id is 20.
+##
+def show_zee_tv_shows(name, url, language, mode, iconimage, bannerimage):
+    html_string = common.fetchPage({"link": APALIMARATHI_ZEE_MARATHI_URL})
+    common.log(html_string)
+
+    #Get the entire TV Shows DIV
+    tv_shows_div = common.parseDOM(html_string["content"], "table", attrs = { "id": "MainContent_DataList2" })
+    print repr(tv_shows_div)
+    if len(tv_shows_div):
+       available_shows = common.parseDOM(common.parseDOM(tv_shows_div, "a"), "span")
+       for i in range(0, len(available_shows)):
+          #Add Show
+	  print (available_shows[i]).encode('utf-8')
+          #addDir(available_shows[i], available_shows[i], 14, '')
+       available_shows_href = common.parseDOM(tv_shows_div, "a", ret = "href")
+       for i in range(0, len(available_shows_href)):
+          #Add Show
+	  print (available_shows_href[i]).encode('utf-8')
+	  addDir((available_shows[i]).encode('utf-8'), APALIMARATHI_ZEE_MARATHI_BASE_URL + (available_shows_href[i]).encode('utf-8'), 21, '')
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+##
+# Displays the available dates for selected TV Show. Called when id is 21.
+##
+def show_zee_tv_shows_dates(name, url, language, mode, iconimage, bannerimage):
+    print "url:[%s]" % url
+    html_string = common.fetchPage({"link": url})
+    common.log(html_string)
+
+    #Get the entire TV Shows DIV
+    tv_shows_dates_table = common.parseDOM(html_string["content"], "table", attrs = { "id": "MainContent_DataList2" })
+    print repr(tv_shows_dates_table)
+    if len(tv_shows_dates_table):
+       available_show_dates = common.parseDOM(tv_shows_dates_table, "a")
+       for i in range(0, len(available_show_dates)):
+          #Add Show
+	  print (available_show_dates[i]).encode('utf-8')
+          #addDir(available_shows[i], available_shows[i], 14, '')
+       available_show_dates_href = common.parseDOM(tv_shows_dates_table, "a", ret = "href")
+       for i in range(0, len(available_show_dates_href)):
+          #Add Show
+	  print (available_show_dates_href[i]).encode('utf-8')
+	  addDir((available_show_dates[i]).encode('utf-8'), APALIMARATHI_ZEE_MARATHI_BASE_URL + (available_show_dates_href[i]).encode('utf-8'), 22, '')
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+##
+# Displays the available parts for selected TV Show. Called when id is 22.
+##
+def show_zee_tv_shows_parts(name, url, language, mode, iconimage, bannerimage):
+    html_string = common.fetchPage({"link": url})
+    common.log(html_string)
+
+    #Get the entire TV Shows DIV
+    tv_shows_parts_div = common.parseDOM(html_string["content"], "div", attrs = { "id": "MainContent_List" })
+    #print repr(tv_shows_parts_div)
+    if len(tv_shows_parts_div):
+       available_show_parts = common.parseDOM(tv_shows_parts_div, "a")
+       for i in range(0, len(available_show_parts)):
+          #Add Show
+	  print (available_show_parts[i]).encode('utf-8')
+       available_show_parts_href = common.parseDOM(tv_shows_parts_div, "a", ret = "href")
+       for i in range(0, len(available_show_parts_href)):
+          #Add Show
+	  print (available_show_parts_href[i]).encode('utf-8')
+	  addDir((available_show_parts[i]).encode('utf-8'), APALIMARATHI_ZEE_MARATHI_BASE_URL + (available_show_parts_href[i]).encode('utf-8'), 23, '')
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+def get_tv_show_part_video_url(name, url, language, mode, iconimage, bannerimage):
+    part_page_html = common.fetchPage({"link": url})
+    #print "Input url-[%s]" % url
+    #print "part_page_html-[%s]" % part_page_html["content"].encode('utf-8')
+    #Parse the URL for the MainContent_content1 to get movie Embed link Page
+    part_embed_link_list = common.parseDOM(part_page_html["content"], "div", attrs = { "id": "MainContent_content1" })
+    if len(part_embed_link_list):
+       #print "Main_EmbDiv: " + repr(part_embed_link_list[0])
+       match = re.compile('load\(\'(.+?)\'\)').findall(part_embed_link_list[0])
+       if len(match):
+          part_embed_url = urljoin(url, match[0])
+          #print "PART URL:" + part_embed_url
+          #Find the atual provided URL
+          part_embed_html = common.fetchPage({"link": part_embed_url})
+          #print "part_embed_html: " + repr(part_embed_html["content"])
+          part_iframe_src_list = common.parseDOM(part_embed_html["content"], "iframe", ret = "src")
+          if len(part_iframe_src_list):
+             print "iframe_src: " + repr(part_iframe_src_list[0])
+             play_video(name, part_iframe_src_list[0].encode('utf-8'), language, mode, iconimage, bannerimage)
+
+##
 # Displays the List of movies for selected year. Called when id is 14.
 ##
 def show_movie_list_by_year(name, url, language, mode, iconimage, bannerimage):
@@ -386,6 +481,15 @@ def show_movie_list_by_year(name, url, language, mode, iconimage, bannerimage):
 # Displays the options for A-Z view. Called when id is 8.
 ##
 def show_settings(name, url, language, mode, iconimage, bannerimage):
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+##
+# Prints the TV Channel list. Called when id is 19.
+##
+def show_tv_channels(name, url, language, mode, iconimage, bannerimage):
+    cwd = ADDON.getAddonInfo('path')
+    img_path = cwd + '/images/'
+    addDir('ZEE Marathi', '', 20, img_path + 'Zee_Marathi.jpg', 'marathi')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 params=get_params()
@@ -440,6 +544,12 @@ except:
 #14: show_movie_list_by_year
 #15: inner_natak_categories
 #16: show_recent_natak_list
+#17: show_natak_A_Z
+#18: show_natak_list_by_alpha
+#19: show_tv_channels
+#20: show_zee_tv_shows
+#20: show_zee_tv_shows_dates
+#21: show_zee_tv_shows_parts
 
 function_map = {}
 function_map[0] = main_categories
@@ -457,5 +567,10 @@ function_map[15] = inner_natak_categories
 function_map[16] = show_recent_natak_list
 function_map[17] = show_natak_A_Z
 function_map[18] = show_natak_list_by_alpha
+function_map[19] = show_tv_channels
+function_map[20] = show_zee_tv_shows
+function_map[21] = show_zee_tv_shows_dates
+function_map[22] = show_zee_tv_shows_parts
+function_map[23] = get_tv_show_part_video_url
 
 function_map[mode](name, url, language, mode, iconimage, bannerimage)
