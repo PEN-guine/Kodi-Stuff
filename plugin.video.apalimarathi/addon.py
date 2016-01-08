@@ -402,7 +402,7 @@ def show_zee_tv_shows(name, url, language, mode, iconimage, bannerimage):
 # Displays the available dates for selected TV Show. Called when id is 21.
 ##
 def show_zee_tv_shows_dates(name, url, language, mode, iconimage, bannerimage):
-    print "url:[%s]" % url
+    print "Showing Dates for url:[%s]" % url
     html_string = common.fetchPage({"link": url})
     common.log(html_string)
 
@@ -419,14 +419,14 @@ def show_zee_tv_shows_dates(name, url, language, mode, iconimage, bannerimage):
        for i in range(0, len(available_show_dates_href)):
           #Add Show
 	  print (available_show_dates_href[i]).encode('utf-8')
-	  addDir((available_show_dates[i]).encode('utf-8'), APALIMARATHI_ZEE_MARATHI_BASE_URL + (available_show_dates_href[i]).encode('utf-8'), 22, '')
+	  addDir((available_show_dates[i]).encode('utf-8'), APALIMARATHI_ZEE_MARATHI_BASE_URL + (available_show_dates_href[i]).encode('utf-8'), 24, '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
 # Displays the available parts for selected TV Show. Called when id is 22.
 ##
-def show_zee_tv_shows_parts(name, url, language, mode, iconimage, bannerimage):
+def show_zee_tv_shows_parts_old(name, url, language, mode, iconimage, bannerimage):
     html_string = common.fetchPage({"link": url})
     common.log(html_string)
 
@@ -443,6 +443,58 @@ def show_zee_tv_shows_parts(name, url, language, mode, iconimage, bannerimage):
           #Add Show
 	  print (available_show_parts_href[i]).encode('utf-8')
 	  addDir((available_show_parts[i]).encode('utf-8'), APALIMARATHI_ZEE_MARATHI_BASE_URL + (available_show_parts_href[i]).encode('utf-8'), 23, '')
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+#Shows all parts for selected Date
+def show_zee_tv_shows_parts(name, url, language, mode, iconimage, bannerimage):
+    print "Showing Parts for date: " + name + ", with url:"+ url
+
+    h = HTMLParser.HTMLParser()
+    isLastPage = False
+    #Start with the url of 1st part page
+    part_page_url = url
+
+    nParts = 0;
+    #Loop until we reach the last page
+    while isLastPage == False:
+        nParts = nParts + 1
+        #Fetch the part page from the URL
+        part_page_html = common.fetchPage({"link": part_page_url})
+        #print "part_page_html: " + repr(part_page_html["content"])
+
+        #Parse the URL for the MainContent_List to get movie Embed link Page
+        part_embed_link_list = common.parseDOM(part_page_html["content"], "div", attrs = { "id": "MainContent_List" })
+        if len(part_embed_link_list):
+           #print "Main_EmbDiv: " + repr(part_embed_link_list[0])
+           match = re.compile('load\(\'(.+?)\'\)').findall(part_embed_link_list[0])
+           if len(match):
+              part_embed_url = urljoin(url, match[0])
+              #print "PART URL:" + part_embed_url
+              #Find the atual provided URL
+              part_embed_html = common.fetchPage({"link": part_embed_url})
+              #print "part_embed_html: " + repr(part_embed_html["content"])
+              part_iframe_src_list = common.parseDOM(part_embed_html["content"], "iframe", ret = "src")
+              if len(part_iframe_src_list):
+                 print "iframe_src: " + repr(part_iframe_src_list[0])
+
+                 addDir(name + " : Part %d" % nParts, part_iframe_src_list[0].encode('utf-8'), 2, iconimage, bannerimage)
+
+        #Parse the URL for the Next Pages
+        next_part_page_div = common.parseDOM(part_page_html["content"], "div", attrs = { "id": "MainContent_nPart"})
+        if len(next_part_page_div):
+           next_part_page_list = common.parseDOM(next_part_page_div[0], "a", ret = 'href')
+           if len(next_part_page_list):
+              print "Next Page Partial URL: " + repr(next_part_page_list[0])
+              #part_page_url = urljoin(url, urllib.quote_plus(h.unescape(next_part_page_list[0])))
+              part_page_url = urlencode_local( urljoin(url, h.unescape(next_part_page_list[0])) )
+              print "Next Page URL: " + repr(part_page_url)
+           else:
+              isLastPage = True
+        else:
+           isLastPage = True
+
+        if nParts >= 20: isLastPage = True #Just a termination condition for testing
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -548,8 +600,10 @@ except:
 #18: show_natak_list_by_alpha
 #19: show_tv_channels
 #20: show_zee_tv_shows
-#20: show_zee_tv_shows_dates
-#21: show_zee_tv_shows_parts
+#21: show_zee_tv_shows_dates
+#22: show_zee_tv_shows_parts_old
+#23: get_tv_show_part_video_url
+#24: show_zee_tv_shows_parts
 
 function_map = {}
 function_map[0] = main_categories
@@ -570,7 +624,8 @@ function_map[18] = show_natak_list_by_alpha
 function_map[19] = show_tv_channels
 function_map[20] = show_zee_tv_shows
 function_map[21] = show_zee_tv_shows_dates
-function_map[22] = show_zee_tv_shows_parts
+function_map[22] = show_zee_tv_shows_parts_old
 function_map[23] = get_tv_show_part_video_url
+function_map[24] = show_zee_tv_shows_parts
 
 function_map[mode](name, url, language, mode, iconimage, bannerimage)
