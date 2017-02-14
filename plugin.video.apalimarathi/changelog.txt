@@ -1,3 +1,6 @@
+[B]v0.0.9[/B]
+Fixed to work on Kodi 17
+
 [B]v0.0.8[/B]
 Fixed Zee Marathi TV Shows to work with new page format by ApaliMarathi.
 

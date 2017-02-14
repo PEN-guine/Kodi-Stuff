@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.apalimarathi"
        name="ApaliMarathi"
-       version="0.0.8"
+       version="0.0.9"
        provider-name="[COLOR blue]PEN[/COLOR]guine">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>

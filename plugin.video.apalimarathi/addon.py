@@ -265,7 +265,7 @@ def play_video(name, url, language, mode, iconimage, bannerimage):
        listitem = xbmcgui.ListItem(name)
        listitem.setThumbnailImage(iconimage)
        playlist.add(stream_url, listitem)
-       xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(playlist)
+       xbmc.Player().play(playlist)
     else:
        print "No Video stream resolved for URL: " + url
        if url.find("vid.me"):
