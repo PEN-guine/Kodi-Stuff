@@ -22,11 +22,11 @@ ADDON = xbmcaddon.Addon(id='plugin.video.apalimarathi')
 
 APALIMARATHI_MOVIES_URL = "http://mtalky.com/"
 APALIMARATHI_NATAKS_URL = "http://mtalky.com/"
-APALIMARATHI_MOVIES_PAGE_URL = "http://mtalky.com/OnlineList.aspx?Show=Picture&page="
-APALIMARATHI_MOVIES_ALPHA_URL = "http://mtalky.com/OnlineList.aspx?Show=Picture&NameStartWithLetter="
-APALIMARATHI_NATAKS_ALPHA_URL = "http://mtalky.com/OnlineList.aspx?Show=Nataks&NameStartWithLetter="
-APALIMARATHI_MOVIES_YEARS_URL = "http://mtalky.com/OnlineList.aspx?Show=Picture&ReleaseYear="
-APALIMARATHI_NATAKS_PAGE_URL = "http://mtalky.com/OnlineList.aspx?Show=Nataks&page="
+APALIMARATHI_MOVIES_PAGE_URL = "http://mtalky.com/list.aspx?Show=Picture&page="
+APALIMARATHI_MOVIES_ALPHA_URL = "http://mtalky.com/list.aspx?Show=Picture&NameStartWithLetter="
+APALIMARATHI_NATAKS_ALPHA_URL = "http://mtalky.com/list.aspx?Show=Nataks&NameStartWithLetter="
+APALIMARATHI_MOVIES_YEARS_URL = "http://mtalky.com/list.aspx?Show=Picture&ReleaseYear="
+APALIMARATHI_NATAKS_PAGE_URL = "http://mtalky.com/list.aspx?Show=Nataks&page="
 APALIMARATHI_ZEE_MARATHI_BASE_URL = "http://tvforumonline.com/"
 APALIMARATHI_ZEE_MARATHI_URL = "http://tvforumonline.com/Guide.aspx?c=One"
 

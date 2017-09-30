@@ -1,3 +1,6 @@
+[B]v0.1.0[/B]
+Changed URLs
+
 [B]v0.0.9[/B]
 Fixed to work on Kodi 17
 
