@@ -13,6 +13,9 @@ import HTMLParser, urlparse
 import urlresolver
 from urlparse import urljoin
 
+import requests
+
+
 common = CommonFunctions
 common.plugin = "plugin.video.apalimarathi"
 #common.dbg = True # Default
@@ -107,7 +110,8 @@ def show_recent_natak_list(name, url, language, mode, iconimage, bannerimage):
     cwd = ADDON.getAddonInfo('path')
     currentPage = int(url)
     print "input url-Page = [%d]" % currentPage
-    html_string = common.fetchPage({"link": APALIMARATHI_NATAKS_PAGE_URL + str(currentPage)})
+    ###html_string = common.fetchPage({"link": APALIMARATHI_NATAKS_PAGE_URL + str(currentPage)})
+    html_string = requests.get(APALIMARATHI_NATAKS_PAGE_URL + str(currentPage)).text
     common.log(html_string)
 
     retMovies = get_movies_from_url(APALIMARATHI_NATAKS_PAGE_URL + str(currentPage))
@@ -115,7 +119,8 @@ def show_recent_natak_list(name, url, language, mode, iconimage, bannerimage):
         addDir((retMovies[i]['Title']).encode('utf-8'), APALIMARATHI_NATAKS_URL + (retMovies[i]['Link']).encode('utf-8'), 9, (retMovies[i]['ImageLink']).encode('utf-8'))
 
     #Create the Next Page link
-    page_div = common.parseDOM(html_string["content"], "div", attrs = { "id": "Main_ChildContent1_Panel1" })
+    ###page_div = common.parseDOM(html_string["content"], "div", attrs = { "id": "Main_ChildContent1_Panel1" })
+    page_div = common.parseDOM(html_string, "div", attrs = { "id": "Main_ChildContent1_Panel1" })
     page_list = common.parseDOM(page_div, "a") #, ret = "href")
     print repr(page_list)
     #page_links_list = common.parseDOM(html_string, "a", attrs = { "class": "pageLink" })
@@ -129,7 +134,8 @@ def show_recent_list(name, url, language, mode, iconimage, bannerimage):
     cwd = ADDON.getAddonInfo('path')
     currentPage = int(url)
     print "input url-Page = [%d]" % currentPage
-    html_string = common.fetchPage({"link": APALIMARATHI_MOVIES_PAGE_URL + str(currentPage)})
+    #html_string = common.fetchPage({"link": APALIMARATHI_MOVIES_PAGE_URL + str(currentPage)})
+    html_string = requests.get(APALIMARATHI_MOVIES_PAGE_URL + str(currentPage)).text
     common.log(html_string)
 
     retMovies = get_movies_from_url(APALIMARATHI_MOVIES_PAGE_URL + str(currentPage))
@@ -137,7 +143,8 @@ def show_recent_list(name, url, language, mode, iconimage, bannerimage):
         addDir((retMovies[i]['Title']).encode('utf-8'), APALIMARATHI_MOVIES_URL + (retMovies[i]['Link']).encode('utf-8'), 9, (retMovies[i]['ImageLink']).encode('utf-8'))
 
     #Create the Next Page link
-    page_div = common.parseDOM(html_string["content"], "div", attrs = { "id": "Main_ChildContent1_Panel1" })
+    ###page_div = common.parseDOM(html_string["content"], "div", attrs = { "id": "Main_ChildContent1_Panel1" })
+    page_div = common.parseDOM(html_string, "div", attrs = { "id": "Main_ChildContent1_Panel1" })
     page_list = common.parseDOM(page_div, "a") #, ret = "href")
     print repr(page_list)
     #page_links_list = common.parseDOM(html_string, "a", attrs = { "class": "pageLink" })
@@ -149,13 +156,16 @@ def show_recent_list(name, url, language, mode, iconimage, bannerimage):
 
 def show_movie_page(name, url, language, mode, iconimage, bannerimage):
     print "Showing Main Movie Page: " + name + ", with url:"+ url
-    movie_page_html_string = common.fetchPage({"link": url})
-    print repr(movie_page_html_string["content"])
+    ###movie_page_html_string = common.fetchPage({"link": url})
+    movie_page_html_string = requests.get(url).text
+    ###print repr(movie_page_html_string["content"])
+    print repr(movie_page_html_string)
     ###Need to figure out unicode font support
     #movie_name_list = common.parseDOM(movie_page_html_string["content"], "span", attrs = { "id": "Main_NameLabel" })
     #print (movie_name_list[0]).encode('utf-8')
     #addDir((movie_name_list[0]).encode('utf-8'), url, 2, '')
-    movie_image_list = common.parseDOM(movie_page_html_string["content"], "img", attrs = { "id": "Main_imageResize1" }, ret = "src")
+    ###movie_image_list = common.parseDOM(movie_page_html_string["content"], "img", attrs = { "id": "Main_imageResize1" }, ret = "src")
+    movie_image_list = common.parseDOM(movie_page_html_string, "img", attrs = { "id": "Main_imageResize1" }, ret = "src")
     print (movie_image_list[0]).encode('utf-8')
     match = re.compile('img.ashx\?p=(.+?)\|').findall(movie_image_list[0])
     banner_image_url = match[0]
@@ -165,12 +175,14 @@ def show_movie_page(name, url, language, mode, iconimage, bannerimage):
     print "IMG:" + iconimage
 
     #get the Form elements.
-    viewstate_list = common.parseDOM(movie_page_html_string["content"], "input", attrs = { "id": "__VIEWSTATE" }, ret = "value")
+    ###viewstate_list = common.parseDOM(movie_page_html_string["content"], "input", attrs = { "id": "__VIEWSTATE" }, ret = "value")
+    viewstate_list = common.parseDOM(movie_page_html_string, "input", attrs = { "id": "__VIEWSTATE" }, ret = "value")
     print (viewstate_list[0]).encode('utf-8')
 
     movie_sources_names_list = []
     #Find the movie sources - value
-    movie_source_list = common.parseDOM(movie_page_html_string["content"], "input", attrs = { "type": "submit" }, ret = "value")
+    ###movie_source_list = common.parseDOM(movie_page_html_string["content"], "input", attrs = { "type": "submit" }, ret = "value")
+    movie_source_list = common.parseDOM(movie_page_html_string, "input", attrs = { "type": "submit" }, ret = "value")
     for i in range(0, len(movie_source_list)):
         movie_source_name = {}
         movie_source_name['value'] = movie_source_list[i]
@@ -178,17 +190,22 @@ def show_movie_page(name, url, language, mode, iconimage, bannerimage):
         movie_sources_names_list.append(movie_source_name)
 
     #Find the movie sources - name
-    movie_source_list = common.parseDOM(movie_page_html_string["content"], "input", attrs = { "type": "submit" }, ret = "name")
+    ###movie_source_list = common.parseDOM(movie_page_html_string["content"], "input", attrs = { "type": "submit" }, ret = "name")
+    movie_source_list = common.parseDOM(movie_page_html_string, "input", attrs = { "type": "submit" }, ret = "name")
     for i in range(0, len(movie_source_list)):
         movie_sources_names_list[i]['name'] = movie_source_list[i]
 
         #Find the first page URL by POSTing the form data
+        ###l_post_data = { "__VIEWSTATE" : viewstate_list[0], "__SCROLLPOSITIONX" : "0", "__SCROLLPOSITIONY" : "400", "__EVENTTARGET" : "", movie_sources_names_list[i]['name'] : movie_sources_names_list[i]['value'].encode('utf-8') }
         l_post_data = { "__VIEWSTATE" : viewstate_list[0], "__SCROLLPOSITIONX" : "0", "__SCROLLPOSITIONY" : "400", "__EVENTTARGET" : "", movie_sources_names_list[i]['name'] : movie_sources_names_list[i]['value'].encode('utf-8') }
-        movie_page_1_html_string = common.fetchPage({"link": url, "post_data" : l_post_data})
-        print repr(movie_page_1_html_string["content"])
-        print "redirect url: " + repr(movie_page_1_html_string["new_url"])
+        ###movie_page_1_html_string = common.fetchPage({"link": url, "post_data" : l_post_data})
+        movie_page_1_html_string = requests.post(url, data=l_post_data)
+        ###print repr(movie_page_1_html_string["content"])
+        #print movie_page_1_html_string
+        print "redirect url: " + movie_page_1_html_string.url
 
-        movie_sources_names_list[i]['Link'] = movie_page_1_html_string["new_url"].encode('utf-8')
+        ###movie_sources_names_list[i]['Link'] = movie_page_1_html_string["new_url"].encode('utf-8')
+        movie_sources_names_list[i]['Link'] = movie_page_1_html_string.url.encode('utf-8')
         print (movie_source_list[i]).encode('utf-8')
 
     for i in range(0, len(movie_sources_names_list)):
@@ -212,11 +229,16 @@ def show_movie_sources_page(name, url, language, mode, iconimage, bannerimage):
     while isLastPage == False:
         nParts = nParts + 1
         #Fetch the part page from the URL
-        part_page_html = common.fetchPage({"link": part_page_url})
-        #print "part_page_html: " + repr(part_page_html["content"])
+        ###part_page_html = common.fetchPage({"link": part_page_url})
+        print "part_page_url: " + repr(part_page_url)
+        part_page_html = requests.get(part_page_url).text
+        print "part_page_url Read"
+        #print "part_page_html: " + repr(part_page_html)
 
         #Parse the URL for the Main_EmbDiv to get movie Embed link Page
-        part_embed_link_list = common.parseDOM(part_page_html["content"], "div", attrs = { "id": "Main_EmbDiv" })
+        ###part_embed_link_list = common.parseDOM(part_page_html["content"], "div", attrs = { "id": "Main_EmbDiv" })
+        part_embed_link_list = common.parseDOM(part_page_html, "div", attrs = { "id": "Main_EmbDiv" })
+	print " After Parsing part_page_html: "
         if len(part_embed_link_list):
            #print "Main_EmbDiv: " + repr(part_embed_link_list[0])
            match = re.compile('load\(\'(.+?)\'\)').findall(part_embed_link_list[0])
@@ -224,16 +246,23 @@ def show_movie_sources_page(name, url, language, mode, iconimage, bannerimage):
               part_embed_url = urljoin(url, match[0])
               #print "PART URL:" + part_embed_url
               #Find the atual provided URL
-              part_embed_html = common.fetchPage({"link": part_embed_url})
+              ###part_embed_html = common.fetchPage({"link": part_embed_url})
+	      print "part_embed_url: " + repr(part_embed_url)
+              part_embed_html = requests.get(part_embed_url).text
+	      print "part_embed_url read: "
               #print "part_embed_html: " + repr(part_embed_html["content"])
-              part_iframe_src_list = common.parseDOM(part_embed_html["content"], "iframe", ret = "src")
+              ###part_iframe_src_list = common.parseDOM(part_embed_html["content"], "iframe", ret = "src")
+              part_iframe_src_list = common.parseDOM(part_embed_html, "iframe", ret = "src")
+	      print " After Parsing part_embed_html: "
               if len(part_iframe_src_list):
                  print "iframe_src: " + repr(part_iframe_src_list[0])
 
                  addDir(name + " : Part %d" % nParts, part_iframe_src_list[0].encode('utf-8'), 2, iconimage, bannerimage)
 
         #Parse the URL for the Next Pages
-        next_part_page_list = common.parseDOM(part_page_html["content"], "a", attrs = { "id": "Main_lnkNext"}, ret = "href")
+        ###next_part_page_list = common.parseDOM(part_page_html["content"], "a", attrs = { "id": "Main_lnkNext"}, ret = "href")
+        next_part_page_list = common.parseDOM(part_page_html, "a", attrs = { "id": "Main_lnkNext"}, ret = "href")
+	print " After Parsing part_page_html 2: "
         if len(next_part_page_list):
            print "Next Page Partial URL: " + repr(next_part_page_list[0])
            #part_page_url = urljoin(url, urllib.quote_plus(h.unescape(next_part_page_list[0])))
@@ -326,11 +355,13 @@ def show_natak_list_by_alpha(name, url, language, mode, iconimage, bannerimage):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def get_movies_from_url(urlIn):
-    html_string = common.fetchPage({"link": urlIn})
+    #html_string = common.fetchPage({"link": urlIn})
+    html_string = requests.get(urlIn).text
     common.log(html_string)
 
     #Get the entire Movie DIV
-    movie_div = common.parseDOM(html_string["content"], "div", attrs = { "class": "MovieDiv" })
+    ###movie_div = common.parseDOM(html_string["content"], "div", attrs = { "class": "MovieDiv" })
+    movie_div = common.parseDOM(html_string, "div", attrs = { "class": "MovieDiv" })
 
     movies = []
 
@@ -361,11 +392,13 @@ def get_movies_from_url(urlIn):
 # Displays the options for A-Z view. Called when id is 8.
 ##
 def show_Years(name, url, language, mode, iconimage, bannerimage):
-    html_string = common.fetchPage({"link": APALIMARATHI_MOVIES_YEARS_URL + str(2015)})
+    ###html_string = common.fetchPage({"link": APALIMARATHI_MOVIES_YEARS_URL + str(2015)})
+    html_string = requests.get(APALIMARATHI_MOVIES_YEARS_URL + str(2015)).text
     common.log(html_string)
 
     #Get the entire Movie DIV
-    years_div = common.parseDOM(html_string["content"], "div", attrs = { "id": "Main_ChildContent1_Year" })
+    ###years_div = common.parseDOM(html_string["content"], "div", attrs = { "id": "Main_ChildContent1_Year" })
+    years_div = common.parseDOM(html_string, "div", attrs = { "id": "Main_ChildContent1_Year" })
     if len(years_div):
        available_years = common.parseDOM(years_div, "a")
        for i in range(0, len(available_years)):
