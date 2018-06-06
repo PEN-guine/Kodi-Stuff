@@ -297,7 +297,7 @@ def play_video(name, url, language, mode, iconimage, bannerimage):
        xbmc.Player().play(playlist)
     else:
        print "No Video stream resolved for URL: " + url
-       if url.find("vid.me"):
+       if url.find("vid.me") > 0:
           print "Trying to resolve for vid.me [%s]" % url
           html = common.fetchPage({"link": url})["content"]
           r = re.search('\<meta property.*og:video:url.*\s*content="([^"]+.mp4[^"]+)', html)
@@ -309,7 +309,20 @@ def play_video(name, url, language, mode, iconimage, bannerimage):
              listitem = xbmcgui.ListItem(name)
              listitem.setThumbnailImage(iconimage)
              playlist.add(stream_url, listitem)
-             xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(playlist)
+             xbmc.Player().play(playlist)
+       elif url.find("sendvid.com") > 0:
+          print "Trying to resolve for sendvid.com [%s]" % url
+          html = common.fetchPage({"link": url})["content"]
+          r = re.search('\<meta property.*og:video.*content=\"([^"]+.mp4)\"', html)
+          if r:
+             stream_url = r.group(1).replace('&amp;', '&')
+             print "Playing: stream_url:"+ stream_url
+             playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+             playlist.clear()
+             listitem = xbmcgui.ListItem(name)
+             listitem.setThumbnailImage(iconimage)
+             playlist.add(stream_url, listitem)
+             xbmc.Player().play(playlist)
        else:
           __addon__ = xbmcaddon.Addon()
           __addonname__ = __addon__.getAddonInfo('name')
