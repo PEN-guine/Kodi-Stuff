@@ -313,7 +313,8 @@ def play_video(name, url, language, mode, iconimage, bannerimage):
        elif url.find("sendvid.com") > 0:
           print "Trying to resolve for sendvid.com [%s]" % url
           html = common.fetchPage({"link": url})["content"]
-          r = re.search('\<meta property.*og:video.*content=\"([^"]+.mp4)\"', html)
+          #r = re.search('\<meta property.*og:video.*content=\"([^"]+.mp4)\"', html)
+	  r = re.search('''var\s+video_source\s*=\s*['"](http.*?mp4.*)['"]''', html)
           if r:
              stream_url = r.group(1).replace('&amp;', '&')
              print "Playing: stream_url:"+ stream_url
