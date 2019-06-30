@@ -168,11 +168,21 @@ def show_movie_page(name, url, language, mode, iconimage, bannerimage):
     movie_image_list = common.parseDOM(movie_page_html_string, "img", attrs = { "id": "Main_imageResize1" }, ret = "src")
     print (movie_image_list[0]).encode('utf-8')
     match = re.compile('img.ashx\?p=(.+?)\|').findall(movie_image_list[0])
-    banner_image_url = match[0]
+    if len(match):
+        banner_image_url = match[0]
+    else:
+        banner_image_url = movie_image_list[0]
+
     print "BANNER_IMG:" + banner_image_url
 
     #print "getProperty: " + self.list.getProperty("thumbnailImage")
     print "IMG:" + iconimage
+
+    #get Movie Synopsis
+    #movie_synopsis_list = common.parseDOM(movie_page_html_string, "div", attrs = { "id": "Main_DescriptionLabel" })
+    #if len(movie_synopsis_list):
+    #    print "Synopsis : " + (movie_synopsis_list[0]).encode('utf-8')
+
 
     #get the Form elements.
     ###viewstate_list = common.parseDOM(movie_page_html_string["content"], "input", attrs = { "id": "__VIEWSTATE" }, ret = "value")
@@ -250,14 +260,22 @@ def show_movie_sources_page(name, url, language, mode, iconimage, bannerimage):
 	      print "part_embed_url: " + repr(part_embed_url)
               part_embed_html = requests.get(part_embed_url).text
 	      print "part_embed_url read: "
-              #print "part_embed_html: " + repr(part_embed_html["content"])
+              #print "part_embed_html: " + repr(part_embed_html)
               ###part_iframe_src_list = common.parseDOM(part_embed_html["content"], "iframe", ret = "src")
-              part_iframe_src_list = common.parseDOM(part_embed_html, "iframe", ret = "src")
-	      print " After Parsing part_embed_html: "
+              part_iframe_src_list = common.parseDOM(part_embed_html, "a", ret = "href")
+	      print " After Parsing a - href part_embed_html: "
               if len(part_iframe_src_list):
-                 print "iframe_src: " + repr(part_iframe_src_list[0])
+                 print "a_href: " + repr(part_iframe_src_list[0])
 
                  addDir(name + " : Part %d" % nParts, part_iframe_src_list[0].encode('utf-8'), 2, iconimage, bannerimage)
+	      else:
+	         #search using the iframe src
+	         part_iframe_src_list = common.parseDOM(part_embed_html, "iframe", ret = "src")
+		 print " After Parsing iframe - src part_embed_html: "
+                 if len(part_iframe_src_list):
+                    print "iframe_src: " + repr(part_iframe_src_list[0])
+
+                    addDir(name + " : Part %d" % nParts, part_iframe_src_list[0].encode('utf-8'), 2, iconimage, bannerimage)
 
         #Parse the URL for the Next Pages
         ###next_part_page_list = common.parseDOM(part_page_html["content"], "a", attrs = { "id": "Main_lnkNext"}, ret = "href")
